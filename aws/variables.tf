@@ -1,3 +1,31 @@
+variable "name" {
+	default = "DC/OS"
+}
+
+variable "vpc_remote_state_s3_bucket" {
+  default = ""
+}
+
+variable "vpc_remote_state_s3_key" {
+  default = ""
+}
+
+variable "vpc_remote_state_s3_region" {
+  default = "us-east-1"
+}
+
+variable "dcos_remote_state_s3_bucket" {
+  default = ""
+}
+
+variable "dcos_remote_state_s3_key" {
+  default = ""
+}
+
+variable "dcos_remote_state_s3_region" {
+  default = "us-east-1"
+}
+
 variable "key_name" {
   description = "Key name assicated with your instances for login"
   default = "default"
