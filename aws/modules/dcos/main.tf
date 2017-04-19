@@ -6,9 +6,10 @@ data "terraform_remote_state" "vpc" {
   backend = "s3"
 
   config {
-    bucket = "${var.vpc_remote_state_s3_bucket}"
-    key    = "${var.vpc_remote_state_s3_key}"
-    region = "${var.vpc_remote_state_s3_region}"
+    bucket  = "${var.vpc_remote_state_s3_bucket}"
+    key     = "${var.vpc_remote_state_s3_key}"
+    region  = "${var.vpc_remote_state_s3_region}"
+    profile = "${var.vpc_remote_state_aws_profile}"
   }
 }
 

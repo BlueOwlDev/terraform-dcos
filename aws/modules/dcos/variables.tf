@@ -2,6 +2,10 @@ variable "name" {
 	default = "DC/OS"
 }
 
+variable "vpc_remote_state_aws_profile" {
+	default = ""
+}
+
 variable "vpc_remote_state_s3_bucket" {
   default = ""
 }
