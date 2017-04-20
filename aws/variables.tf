@@ -75,7 +75,7 @@ variable "num_of_masters" {
 
 variable "owner" {
   description = "Paired with Cloud Cluster Cleaner will notify on expiration via slack. Default is whoami. Can be overwritten by setting the value here"
-  default     = "developer"
+  default     = ""
 }
 
 variable "expiration" {
