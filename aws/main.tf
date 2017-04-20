@@ -392,11 +392,12 @@ resource "aws_elb_attachment" "public-agent-elb" {
 # Public Agent Load Balancer Access
 # Adminrouter Only
 resource "aws_elb" "public-agent-elb" {
-  name = "${data.template_file.cluster-name.rendered}-pub-agt-elb"
-	depends_on = ["aws_instance.public-agent"]
+  name            = "${data.template_file.cluster-name.rendered}-pub-agt-elb"
+  depends_on      = ["aws_instance.public-agent"]
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
   security_groups = ["${aws_security_group.public_slave.id}"]
   instances       = ["${aws_instance.public-agent.*.id}"]
+
   #instances       = ["${element(aws_instance.public-agent.*.id, count.index)}"]
 
   listener {
@@ -846,8 +847,9 @@ resource "null_resource" "bootstrap" {
   # Bootstrap script can run on any instance of the cluster
   # So we just choose the first in this case
   connection {
-    host = "${element(aws_instance.bootstrap.*.public_ip, 0)}"
-    user = "${module.aws-tested-oses.user}"
+    host  = "${element(aws_instance.bootstrap.*.public_ip, 0)}"
+    user  = "${module.aws-tested-oses.user}"
+    agent = false
   }
 
   # Generate and upload bootstrap script to node
