@@ -650,7 +650,7 @@ resource "aws_instance" "bootstrap" {
 
   # DCOS ip detect script
   provisioner "file" {
-    source      = "${var.ip-detect["aws"]}"
+    source      = "${path.module}/${var.ip-detect["aws"]}"
     destination = "/tmp/ip-detect"
   }
 
