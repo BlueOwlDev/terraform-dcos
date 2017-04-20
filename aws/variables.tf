@@ -20,12 +20,12 @@ variable "vpc_remote_state_s3_region" {
 
 variable "key_name" {
   description = "Key name assicated with your instances for login"
-  default     = "default"
+  default     = ""
 }
 
 variable "user" {
   description = "Username of the OS"
-  default     = "core"
+  default     = "centos"
 }
 
 variable "aws_region" {
@@ -75,7 +75,7 @@ variable "num_of_masters" {
 
 variable "owner" {
   description = "Paired with Cloud Cluster Cleaner will notify on expiration via slack. Default is whoami. Can be overwritten by setting the value here"
-  default     = ""
+  default     = "developer"
 }
 
 variable "expiration" {
