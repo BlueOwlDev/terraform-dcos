@@ -619,7 +619,6 @@ resource "aws_instance" "bootstrap" {
     user = "${module.aws-tested-oses.user}"
 
     # The connection will use the local SSH agent for authentication.
-    agent = false
   }
 
   root_block_device {
@@ -850,7 +849,6 @@ resource "null_resource" "bootstrap" {
   connection {
     host  = "${element(aws_instance.bootstrap.*.public_ip, 0)}"
     user  = "${module.aws-tested-oses.user}"
-    agent = false
   }
 
   # Generate and upload bootstrap script to node
