@@ -20,7 +20,6 @@ data "external" "whoami" {
   program = ["${path.module}/scripts/local/whoami.sh"]
 }
 
-# Allow overrides of the owner variable or default to whoami.sh
 data "template_file" "cluster-name" {
   template = "$${username}-tf$${uuid}"
 
@@ -474,7 +473,7 @@ resource "aws_instance" "master" {
   # We're going to launch into the same subnet as our ELB. In a production
   # environment it's more common to have a separate private subnet for
   # backend instances.
-  subnet_id = "${element(data.terraform_remote_state.vpc.public_subnet_ids, count.index)}"
+  subnet_id = "${element(data.terraform_remote_state.vpc.private_subnet_ids, count.index)}"
 
   # We run a remote provisioner on the instance after creating it.
   # In this case, we just install nginx and start it. By default,
@@ -588,7 +587,7 @@ resource "aws_instance" "public-agent" {
   # We're going to launch into the same subnet as our ELB. In a production
   # environment it's more common to have a separate private subnet for
   # backend instances.
-  subnet_id = "${data.terraform_remote_state.vpc.public_subnet_ids[0]}"
+  subnet_id = "${data.terraform_remote_state.vpc.private_subnet_ids[0]}"
 
   # OS init script
   provisioner "file" {
@@ -647,7 +646,7 @@ resource "aws_instance" "bootstrap" {
   # We're going to launch into the same subnet as our ELB. In a production
   # environment it's more common to have a separate private subnet for
   # backend instances.
-  subnet_id = "${data.terraform_remote_state.vpc.public_subnet_ids[0]}"
+  subnet_id = "${data.terraform_remote_state.vpc.private_subnet_ids[0]}"
 
   # DCOS ip detect script
   provisioner "file" {
