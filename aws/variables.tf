@@ -1,3 +1,11 @@
+variable "bastion_host" {
+  default = ""
+}
+
+variable "bastion_user" {
+  default = ""
+}
+
 variable "vpc_remote_state_terraform_environment" {
   default = ""
 }

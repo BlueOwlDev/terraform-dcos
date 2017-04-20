@@ -436,9 +436,10 @@ resource "aws_instance" "master" {
   # communicate with the resource (instance)
   connection {
     # The default username for our AMI
-    user = "${module.aws-tested-oses.user}"
-
-    # The connection will use the local SSH agent for authentication.
+    user         = "${module.aws-tested-oses.user}"
+    bastion_host = "${var.bastion_host}"
+    bastion_user = "${var.bastion_user}"
+    agent        = true
   }
 
   root_block_device {
@@ -496,7 +497,10 @@ resource "aws_instance" "agent" {
   # communicate with the resource (instance)
   connection {
     # The default username for our AMI
-    user = "${module.aws-tested-oses.user}"
+    user         = "${module.aws-tested-oses.user}"
+    bastion_host = "${var.bastion_host}"
+    bastion_user = "${var.bastion_user}"
+    agent        = true
 
     # The connection will use the local SSH agent for authentication.
   }
@@ -556,7 +560,10 @@ resource "aws_instance" "public-agent" {
   # communicate with the resource (instance)
   connection {
     # The default username for our AMI
-    user = "${module.aws-tested-oses.user}"
+    user         = "${module.aws-tested-oses.user}"
+    bastion_host = "${var.bastion_host}"
+    bastion_user = "${var.bastion_user}"
+    agent        = true
 
     # The connection will use the local SSH agent for authentication.
   }
@@ -616,10 +623,10 @@ resource "aws_instance" "bootstrap" {
   # communicate with the resource (instance)
   connection {
     # The default username for our AMI
-    user = "${module.aws-tested-oses.user}"
-
-    # The connection will use the local SSH agent for authentication.
-    agent = true
+    user         = "${module.aws-tested-oses.user}"
+    bastion_host = "${var.bastion_host}"
+    bastion_user = "${var.bastion_user}"
+    agent        = true
   }
 
   root_block_device {
@@ -848,9 +855,11 @@ resource "null_resource" "bootstrap" {
   # Bootstrap script can run on any instance of the cluster
   # So we just choose the first in this case
   connection {
-    host  = "${element(aws_instance.bootstrap.*.public_ip, 0)}"
-    user  = "${module.aws-tested-oses.user}"
-    agent = true
+    host         = "${element(aws_instance.bootstrap.*.public_ip, 0)}"
+    user         = "${module.aws-tested-oses.user}"
+    bastion_host = "${var.bastion_host}"
+    bastion_user = "${var.bastion_user}"
+    agent        = true
   }
 
   # Generate and upload bootstrap script to node
@@ -890,8 +899,11 @@ resource "null_resource" "master" {
   # Bootstrap script can run on any instance of the cluster
   # So we just choose the first in this case
   connection {
-    host = "${element(aws_instance.master.*.public_ip, count.index)}"
-    user = "${module.aws-tested-oses.user}"
+    host         = "${element(aws_instance.master.*.public_ip, count.index)}"
+    user         = "${module.aws-tested-oses.user}"
+    bastion_host = "${var.bastion_host}"
+    bastion_user = "${var.bastion_user}"
+    agent        = true
   }
 
   count = "${var.num_of_masters}"
@@ -944,8 +956,11 @@ resource "null_resource" "agent" {
   # Bootstrap script can run on any instance of the cluster
   # So we just choose the first in this case
   connection {
-    host = "${element(aws_instance.agent.*.public_ip, count.index)}"
-    user = "${module.aws-tested-oses.user}"
+    host         = "${element(aws_instance.agent.*.public_ip, count.index)}"
+    user         = "${module.aws-tested-oses.user}"
+    bastion_host = "${var.bastion_host}"
+    bastion_user = "${var.bastion_user}"
+    agent        = true
   }
 
   count = "${var.num_of_private_agents}"
@@ -991,8 +1006,11 @@ resource "null_resource" "public-agent" {
   # Bootstrap script can run on any instance of the cluster
   # So we just choose the first in this case
   connection {
-    host = "${element(aws_instance.public-agent.*.public_ip, count.index)}"
-    user = "${module.aws-tested-oses.user}"
+    host         = "${element(aws_instance.public-agent.*.public_ip, count.index)}"
+    user         = "${module.aws-tested-oses.user}"
+    bastion_host = "${var.bastion_host}"
+    bastion_user = "${var.bastion_user}"
+    agent        = true
   }
 
   count = "${var.num_of_public_agents}"
