@@ -619,6 +619,7 @@ resource "aws_instance" "bootstrap" {
     user = "${module.aws-tested-oses.user}"
 
     # The connection will use the local SSH agent for authentication.
+    agent = false
   }
 
   root_block_device {
