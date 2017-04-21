@@ -852,7 +852,7 @@ resource "null_resource" "bootstrap" {
   # Bootstrap script can run on any instance of the cluster
   # So we just choose the first in this case
   connection {
-    host         = "${element(aws_instance.bootstrap.*.public_ip, 0)}"
+    host         = "${aws_instance.bootstrap.private_ip}"
     user         = "${module.aws-tested-oses.user}"
     bastion_host = "${var.bastion_host}"
     bastion_user = "${var.bastion_user}"
@@ -896,7 +896,7 @@ resource "null_resource" "master" {
   # Bootstrap script can run on any instance of the cluster
   # So we just choose the first in this case
   connection {
-    host         = "${element(aws_instance.master.*.public_ip, count.index)}"
+    host         = "${element(aws_instance.master.*.private_ip, count.index)}"
     user         = "${module.aws-tested-oses.user}"
     bastion_host = "${var.bastion_host}"
     bastion_user = "${var.bastion_user}"
@@ -953,7 +953,7 @@ resource "null_resource" "agent" {
   # Bootstrap script can run on any instance of the cluster
   # So we just choose the first in this case
   connection {
-    host         = "${element(aws_instance.agent.*.public_ip, count.index)}"
+    host         = "${element(aws_instance.agent.*.private_ip, count.index)}"
     user         = "${module.aws-tested-oses.user}"
     bastion_host = "${var.bastion_host}"
     bastion_user = "${var.bastion_user}"
@@ -1003,7 +1003,7 @@ resource "null_resource" "public-agent" {
   # Bootstrap script can run on any instance of the cluster
   # So we just choose the first in this case
   connection {
-    host         = "${element(aws_instance.public-agent.*.public_ip, count.index)}"
+    host         = "${element(aws_instance.public-agent.*.private_ip, count.index)}"
     user         = "${module.aws-tested-oses.user}"
     bastion_host = "${var.bastion_host}"
     bastion_user = "${var.bastion_user}"
