@@ -500,7 +500,6 @@ resource "aws_instance" "agent" {
     user         = "${module.aws-tested-oses.user}"
     bastion_host = "${var.bastion_host}"
     bastion_user = "${var.bastion_user}"
-    agent        = true
 
     # The connection will use the local SSH agent for authentication.
   }
@@ -563,7 +562,6 @@ resource "aws_instance" "public-agent" {
     user         = "${module.aws-tested-oses.user}"
     bastion_host = "${var.bastion_host}"
     bastion_user = "${var.bastion_user}"
-    agent        = true
 
     # The connection will use the local SSH agent for authentication.
   }
@@ -626,7 +624,6 @@ resource "aws_instance" "bootstrap" {
     user         = "${module.aws-tested-oses.user}"
     bastion_host = "${var.bastion_host}"
     bastion_user = "${var.bastion_user}"
-    agent        = true
   }
 
   root_block_device {
