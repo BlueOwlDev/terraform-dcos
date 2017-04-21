@@ -289,7 +289,7 @@ resource "aws_elb" "internal-master-elb" {
   name = "${data.template_file.cluster-name.rendered}-int-master-elb"
 
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${aws_security_group.dcos-elb.id}"]
+  security_groups = ["${aws_security_group.dcos_elb.id}"]
   instances       = ["${aws_instance.master.*.id}"]
 
   listener {
@@ -352,7 +352,7 @@ resource "aws_elb" "public-master-elb" {
   name = "${data.template_file.cluster-name.rendered}-pub-mas-elb"
 
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${aws_security_group.dcos-elb.id}"]
+  security_groups = ["${aws_security_group.dcos_elb.id}"]
   instances       = ["${aws_instance.master.*.id}"]
 
   listener {
@@ -395,7 +395,7 @@ resource "aws_elb" "public-agent-elb" {
   name            = "${data.template_file.cluster-name.rendered}-pub-agt-elb"
   depends_on      = ["aws_instance.public-agent"]
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${aws_security_group.dcos-elb.id}"]
+  security_groups = ["${aws_security_group.dcos_elb.id}"]
   instances       = ["${aws_instance.public-agent.*.id}"]
 
   #instances       = ["${element(aws_instance.public-agent.*.id, count.index)}"]
