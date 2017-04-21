@@ -42,9 +42,9 @@ resource "aws_s3_bucket" "dcos_bucket" {
 }
 
 # A security group that allows all port access to internal vpc
-resource "aws_security_group" "any_access_internal" {
-  name        = "cluster-security-group"
-  description = "Manage all ports cluster level"
+resource "aws_security_group" "dcos_host" {
+  name        = "dcos-cluster"
+  description = "Manage all ports DC/OS cluster level"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
 
   # full access internally 
@@ -52,7 +52,7 @@ resource "aws_security_group" "any_access_internal" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["${data.terraform_remote_state.vpc.vpc_cidr}"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   # full access internally
@@ -60,21 +60,21 @@ resource "aws_security_group" "any_access_internal" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["${data.terraform_remote_state.vpc.vpc_cidr}"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
 # A security group for the ELB so it is accessible via the web
-resource "aws_security_group" "elb" {
-  name        = "elb-security-group"
-  description = "A security group for the elb"
+resource "aws_security_group" "dcos_elb" {
+  name        = "dcos-elb"
+  description = "A security group for DC/OS ELB"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
 
   # http access from anywhere
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -87,194 +87,194 @@ resource "aws_security_group" "elb" {
   }
 }
 
-# A security group for Admins to control access
-resource "aws_security_group" "admin" {
-  name        = "admin-security-group"
-  description = "Administrators can manage their machines"
-  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
-
-  # SSH access from anywhere
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # http access from anywhere
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # httpS access from anywhere
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # outbound internet access
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-# A security group for the ELB so it is accessible via the web 
-# with some master ports for internal access only
-resource "aws_security_group" "master" {
-  name        = "master-security-group"
-  description = "Security group for masters"
-  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
-
-  # Mesos Master access from within the vpc
-  ingress {
-    to_port     = 5050
-    from_port   = 5050
-    protocol    = "tcp"
-    cidr_blocks = ["${data.terraform_remote_state.vpc.vpc_cidr}"]
-  }
-
-  # Adminrouter access from within the vpc
-  ingress {
-    to_port     = 80
-    from_port   = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Adminrouter SSL access from anywhere
-  ingress {
-    to_port     = 443
-    from_port   = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Marathon access from within the vpc
-  ingress {
-    to_port     = 8080
-    from_port   = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["${data.terraform_remote_state.vpc.vpc_cidr}"]
-  }
-
-  # Exhibitor access from within the vpc
-  ingress {
-    to_port     = 8181
-    from_port   = 8181
-    protocol    = "tcp"
-    cidr_blocks = ["${data.terraform_remote_state.vpc.vpc_cidr}"]
-  }
-
-  # Zookeeper Access from within the vpc
-  ingress {
-    to_port     = 2181
-    from_port   = 2181
-    protocol    = "tcp"
-    cidr_blocks = ["${data.terraform_remote_state.vpc.vpc_cidr}"]
-  }
-
-  # outbound internet access
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-# A security group for public slave so it is accessible via the web
-resource "aws_security_group" "public_slave" {
-  name        = "public-slave-security-group"
-  description = "security group for slave public"
-  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
-
-  # Allow ports within range
-  ingress {
-    to_port     = 21
-    from_port   = 0
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Allow ports within range
-  ingress {
-    to_port     = 5050
-    from_port   = 23
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Allow ports within range
-  ingress {
-    to_port     = 32000
-    from_port   = 5052
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Allow ports within range
-  ingress {
-    to_port     = 21
-    from_port   = 0
-    protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Allow ports within range
-  ingress {
-    to_port     = 5050
-    from_port   = 23
-    protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Allow ports within range
-  ingress {
-    to_port     = 32000
-    from_port   = 5052
-    protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # outbound internet access
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-# A security group for private slave so it is accessible internally
-resource "aws_security_group" "private_slave" {
-  name        = "private-slave-security-group"
-  description = "security group for slave private"
-  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
-
-  # full access internally
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["${data.terraform_remote_state.vpc.vpc_cidr}"]
-  }
-
-  # full access internally
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["${data.terraform_remote_state.vpc.vpc_cidr}"]
-  }
-}
+## A security group for Admins to control access
+#resource "aws_security_group" "admin" {
+#  name        = "admin-security-group"
+#  description = "Administrators can manage their machines"
+#  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
+#
+#  # SSH access from anywhere
+#  ingress {
+#    from_port   = 22
+#    to_port     = 22
+#    protocol    = "tcp"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  # http access from anywhere
+#  ingress {
+#    from_port   = 80
+#    to_port     = 80
+#    protocol    = "tcp"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  # httpS access from anywhere
+#  ingress {
+#    from_port   = 443
+#    to_port     = 443
+#    protocol    = "tcp"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  # outbound internet access
+#  egress {
+#    from_port   = 0
+#    to_port     = 0
+#    protocol    = "-1"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#}
+#
+## A security group for the ELB so it is accessible via the web 
+## with some master ports for internal access only
+#resource "aws_security_group" "master" {
+#  name        = "master-security-group"
+#  description = "Security group for masters"
+#  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
+#
+#  # Mesos Master access from within the vpc
+#  ingress {
+#    to_port     = 5050
+#    from_port   = 5050
+#    protocol    = "tcp"
+#    cidr_blocks = ["${data.terraform_remote_state.vpc.vpc_cidr}"]
+#  }
+#
+#  # Adminrouter access from within the vpc
+#  ingress {
+#    to_port     = 80
+#    from_port   = 80
+#    protocol    = "tcp"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  # Adminrouter SSL access from anywhere
+#  ingress {
+#    to_port     = 443
+#    from_port   = 443
+#    protocol    = "tcp"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  # Marathon access from within the vpc
+#  ingress {
+#    to_port     = 8080
+#    from_port   = 8080
+#    protocol    = "tcp"
+#    cidr_blocks = ["${data.terraform_remote_state.vpc.vpc_cidr}"]
+#  }
+#
+#  # Exhibitor access from within the vpc
+#  ingress {
+#    to_port     = 8181
+#    from_port   = 8181
+#    protocol    = "tcp"
+#    cidr_blocks = ["${data.terraform_remote_state.vpc.vpc_cidr}"]
+#  }
+#
+#  # Zookeeper Access from within the vpc
+#  ingress {
+#    to_port     = 2181
+#    from_port   = 2181
+#    protocol    = "tcp"
+#    cidr_blocks = ["${data.terraform_remote_state.vpc.vpc_cidr}"]
+#  }
+#
+#  # outbound internet access
+#  egress {
+#    from_port   = 0
+#    to_port     = 0
+#    protocol    = "-1"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#}
+#
+## A security group for public slave so it is accessible via the web
+#resource "aws_security_group" "public_slave" {
+#  name        = "public-slave-security-group"
+#  description = "security group for slave public"
+#  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
+#
+#  # Allow ports within range
+#  ingress {
+#    to_port     = 21
+#    from_port   = 0
+#    protocol    = "tcp"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  # Allow ports within range
+#  ingress {
+#    to_port     = 5050
+#    from_port   = 23
+#    protocol    = "tcp"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  # Allow ports within range
+#  ingress {
+#    to_port     = 32000
+#    from_port   = 5052
+#    protocol    = "tcp"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  # Allow ports within range
+#  ingress {
+#    to_port     = 21
+#    from_port   = 0
+#    protocol    = "udp"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  # Allow ports within range
+#  ingress {
+#    to_port     = 5050
+#    from_port   = 23
+#    protocol    = "udp"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  # Allow ports within range
+#  ingress {
+#    to_port     = 32000
+#    from_port   = 5052
+#    protocol    = "udp"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  # outbound internet access
+#  egress {
+#    from_port   = 0
+#    to_port     = 0
+#    protocol    = "-1"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#}
+#
+## A security group for private slave so it is accessible internally
+#resource "aws_security_group" "private_slave" {
+#  name        = "private-slave-security-group"
+#  description = "security group for slave private"
+#  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
+#
+#  # full access internally
+#  ingress {
+#    from_port   = 0
+#    to_port     = 0
+#    protocol    = "-1"
+#    cidr_blocks = ["${data.terraform_remote_state.vpc.vpc_cidr}"]
+#  }
+#
+#  # full access internally
+#  egress {
+#    from_port   = 0
+#    to_port     = 0
+#    protocol    = "-1"
+#    cidr_blocks = ["${data.terraform_remote_state.vpc.vpc_cidr}"]
+#  }
+#}
 
 # Reattach the internal ELBs to the master if they change
 resource "aws_elb_attachment" "internal-master-elb" {
@@ -289,7 +289,7 @@ resource "aws_elb" "internal-master-elb" {
   name = "${data.template_file.cluster-name.rendered}-int-master-elb"
 
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${aws_security_group.master.id}", "${aws_security_group.public_slave.id}", "${aws_security_group.private_slave.id}"]
+  security_groups = ["${aws_security_group.dcos-elb.id}"]
   instances       = ["${aws_instance.master.*.id}"]
 
   listener {
@@ -352,7 +352,7 @@ resource "aws_elb" "public-master-elb" {
   name = "${data.template_file.cluster-name.rendered}-pub-mas-elb"
 
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${aws_security_group.public_slave.id}"]
+  security_groups = ["${aws_security_group.dcos-elb.id}"]
   instances       = ["${aws_instance.master.*.id}"]
 
   listener {
@@ -395,7 +395,7 @@ resource "aws_elb" "public-agent-elb" {
   name            = "${data.template_file.cluster-name.rendered}-pub-agt-elb"
   depends_on      = ["aws_instance.public-agent"]
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${aws_security_group.public_slave.id}"]
+  security_groups = ["${aws_security_group.dcos-elb.id}"]
   instances       = ["${aws_instance.public-agent.*.id}"]
 
   #instances       = ["${element(aws_instance.public-agent.*.id, count.index)}"]
@@ -464,7 +464,7 @@ resource "aws_instance" "master" {
   key_name = "${var.key_name}"
 
   # Our Security group to allow http and SSH access
-  vpc_security_group_ids = ["${aws_security_group.master.id}", "${aws_security_group.admin.id}", "${aws_security_group.any_access_internal.id}"]
+  vpc_security_group_ids = ["${aws_security_group.dcos_host.id}"]
 
   # OS init script
   provisioner "file" {
@@ -526,7 +526,7 @@ resource "aws_instance" "agent" {
   key_name = "${var.key_name}"
 
   # Our Security group to allow http and SSH access
-  vpc_security_group_ids = ["${aws_security_group.private_slave.id}", "${aws_security_group.admin.id}", "${aws_security_group.any_access_internal.id}"]
+  vpc_security_group_ids = ["${aws_security_group.dcos_host.id}"]
 
   # We're going to launch into the same subnet as our ELB. In a production
   # environment it's more common to have a separate private subnet for
@@ -588,7 +588,7 @@ resource "aws_instance" "public-agent" {
   key_name = "${var.key_name}"
 
   # Our Security group to allow http and SSH access
-  vpc_security_group_ids = ["${aws_security_group.public_slave.id}", "${aws_security_group.admin.id}", "${aws_security_group.any_access_internal.id}"]
+  vpc_security_group_ids = ["${aws_security_group.dcos_host.id}"]
 
   # We're going to launch into the same subnet as our ELB. In a production
   # environment it's more common to have a separate private subnet for
@@ -647,7 +647,7 @@ resource "aws_instance" "bootstrap" {
   key_name = "${var.key_name}"
 
   # Our Security group to allow http and SSH access
-  vpc_security_group_ids = ["${aws_security_group.master.id}", "${aws_security_group.admin.id}"]
+  vpc_security_group_ids = ["${aws_security_group.dcos_host.id}"]
 
   # We're going to launch into the same subnet as our ELB. In a production
   # environment it's more common to have a separate private subnet for
