@@ -18,7 +18,7 @@ variable "dcos_master_external_elb_security_group_id" {
   default = ""
 }
 
-variable "dcos_boostrap_security_group_id" {
+variable "dcos_bootstrap_security_group_id" {
   default = ""
 }
 

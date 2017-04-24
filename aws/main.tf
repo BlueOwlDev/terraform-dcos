@@ -337,7 +337,7 @@ resource "aws_instance" "agent" {
   key_name = "${var.key_name}"
 
   # Our Security group to allow http and SSH access
-  vpc_security_group_ids = ["${var.private_slave_security_group_id}"]
+  vpc_security_group_ids = ["${var.dcos_private_slave_security_group_id}"]
 
   # We're going to launch into the same subnet as our ELB. In a production
   # environment it's more common to have a separate private subnet for
@@ -399,7 +399,7 @@ resource "aws_instance" "public-agent" {
   key_name = "${var.key_name}"
 
   # Our Security group to allow http and SSH access
-  vpc_security_group_ids = ["${var.public_slave_security_group_id}"]
+  vpc_security_group_ids = ["${var.dcos_public_slave_security_group_id}"]
 
   # We're going to launch into the same subnet as our ELB. In a production
   # environment it's more common to have a separate private subnet for
