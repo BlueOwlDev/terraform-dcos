@@ -202,24 +202,22 @@ resource "aws_elb_attachment" "public-agent-elb" {
 
 # Public Agent Load Balancer Access
 # Adminrouter Only
-resource "aws_elb" "public-agent-elb" {
+resource "aws_elb" "linkerd-elb" {
   name            = "${data.template_file.cluster-name.rendered}-pub-agt-elb"
   depends_on      = ["aws_instance.public-agent"]
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
   security_groups = ["${var.dcos_master_internal_elb_security_group_id}"]
-  instances       = ["${aws_instance.public-agent.*.id}"]
-
-  #instances       = ["${element(aws_instance.public-agent.*.id, count.index)}"]
+  instances       = ["${aws_instance.agent.*.id}"]
 
   listener {
-    lb_port           = 80
-    instance_port     = 80
+    lb_port           = 9990
+    instance_port     = 9990
     lb_protocol       = "tcp"
     instance_protocol = "tcp"
   }
   listener {
-    lb_port           = 443
-    instance_port     = 443
+    lb_port           = 4041
+    instance_port     = 4041
     lb_protocol       = "tcp"
     instance_protocol = "tcp"
   }
@@ -227,7 +225,7 @@ resource "aws_elb" "public-agent-elb" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 2
-    target              = "HTTP:9090/_haproxy_health_check"
+    target              = "HTTP:9990"
     interval            = 5
   }
   lifecycle {
