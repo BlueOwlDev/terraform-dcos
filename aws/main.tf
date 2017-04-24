@@ -97,7 +97,7 @@ resource "aws_elb_attachment" "internal-master-elb" {
 # Internal Load Balancer Access
 # Mesos Master, Zookeeper, Exhibitor, Adminrouter, Marathon
 resource "aws_elb" "internal-master-elb" {
-  name = "${data.template_file.cluster-name.rendered}-int-master-elb"
+  name = "${var.owner}-int-mstr"
 
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
   security_groups = ["${var.dcos_master_internal_elb_security_group_id}"]
@@ -160,7 +160,7 @@ resource "aws_elb_attachment" "public-master-elb" {
 # Public Master Load Balancer Access
 # Adminrouter Only
 resource "aws_elb" "public-master-elb" {
-  name = "${data.template_file.cluster-name.rendered}-pub-mas-elb"
+  name = "${var.owner}-pub-mstr"
 
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
   security_groups = ["${var.dcos_master_external_elb_security_group_id}"]
