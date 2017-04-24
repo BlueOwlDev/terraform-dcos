@@ -194,19 +194,19 @@ resource "aws_elb" "public-master-elb" {
 }
 
 # Reattach the public ELBs to the agents if they change
-resource "aws_elb_attachment" "public-agent-elb" {
-  count    = "${var.num_of_public_agents}"
-  elb      = "${aws_elb.public-agent-elb.id}"
-  instance = "${element(aws_instance.public-agent.*.id, count.index)}"
+resource "aws_elb_attachment" "linkerd-elb" {
+  count    = "${var.num_of_agents}"
+  elb      = "${aws_elb.linkerd-elb.id}"
+  instance = "${element(aws_instance.agent.*.id, count.index)}"
 }
 
 # Public Agent Load Balancer Access
 # Adminrouter Only
 resource "aws_elb" "linkerd-elb" {
-  name            = "${data.template_file.cluster-name.rendered}-pub-agt-elb"
-  depends_on      = ["aws_instance.public-agent"]
+  name            = "${var.owner}-linkerd-elb"
+  depends_on      = ["aws_instance.agent"]
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${var.dcos_master_internal_elb_security_group_id}"]
+  security_groups = ["${aws_security_group.dcos_elb.id}"]
   instances       = ["${aws_instance.agent.*.id}"]
 
   listener {
@@ -215,12 +215,14 @@ resource "aws_elb" "linkerd-elb" {
     lb_protocol       = "tcp"
     instance_protocol = "tcp"
   }
+
   listener {
     lb_port           = 4041
     instance_port     = 4041
     lb_protocol       = "tcp"
     instance_protocol = "tcp"
   }
+
   health_check {
     healthy_threshold   = 2
     unhealthy_threshold = 2
@@ -228,6 +230,7 @@ resource "aws_elb" "linkerd-elb" {
     target              = "HTTP:9990"
     interval            = 5
   }
+
   lifecycle {
     ignore_changes = ["name"]
   }
