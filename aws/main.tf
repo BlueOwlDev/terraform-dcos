@@ -100,7 +100,7 @@ resource "aws_elb" "internal-master-elb" {
   name = "${var.owner}-int-mstr"
 
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${aws_security_group_dcos_elb.id}"]                    #["${var.dcos_master_internal_elb_security_group_id}"]
+  security_groups = ["${aws_security_group.dcos_elb.id}"]                    #["${var.dcos_master_internal_elb_security_group_id}"]
   instances       = ["${aws_instance.master.*.id}"]
 
   listener {
@@ -163,7 +163,7 @@ resource "aws_elb" "public-master-elb" {
   name = "${var.owner}-pub-mstr"
 
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${aws_security_group_dcos_elb.id}"]                    #["${var.dcos_master_external_elb_security_group_id}"]
+  security_groups = ["${aws_security_group.dcos_elb.id}"]                    #["${var.dcos_master_external_elb_security_group_id}"]
   instances       = ["${aws_instance.master.*.id}"]
 
   listener {
@@ -275,7 +275,7 @@ resource "aws_instance" "master" {
   key_name = "${var.key_name}"
 
   # Our Security group to allow http and SSH access
-  vpc_security_group_ids = ["${aws_security_group_dcos_host.id}"] #["${var.dcos_master_security_group_id}"]
+  vpc_security_group_ids = ["${aws_security_group.dcos_host.id}"] #["${var.dcos_master_security_group_id}"]
 
   # OS init script
   provisioner "file" {
@@ -337,7 +337,7 @@ resource "aws_instance" "agent" {
   key_name = "${var.key_name}"
 
   # Our Security group to allow http and SSH access
-  vpc_security_group_ids = ["${aws_security_group_dcos_host.id}"] #["${var.dcos_private_slave_security_group_id}"]
+  vpc_security_group_ids = ["${aws_security_group.dcos_host.id}"] #["${var.dcos_private_slave_security_group_id}"]
 
   # We're going to launch into the same subnet as our ELB. In a production
   # environment it's more common to have a separate private subnet for
@@ -399,7 +399,7 @@ resource "aws_instance" "public-agent" {
   key_name = "${var.key_name}"
 
   # Our Security group to allow http and SSH access
-  vpc_security_group_ids = ["${aws_security_group_dcos_host.id}"] #["${var.dcos_public_slave_security_group_id}"]
+  vpc_security_group_ids = ["${aws_security_group.dcos_host.id}"] #["${var.dcos_public_slave_security_group_id}"]
 
   # We're going to launch into the same subnet as our ELB. In a production
   # environment it's more common to have a separate private subnet for
@@ -458,7 +458,7 @@ resource "aws_instance" "bootstrap" {
   key_name = "${var.key_name}"
 
   # Our Security group to allow http and SSH access
-  vpc_security_group_ids = ["${aws_security_group_dcos_host.id}"] #["${var.dcos_bootstrap_security_group_id}"]
+  vpc_security_group_ids = ["${aws_security_group.dcos_host.id}"] #["${var.dcos_bootstrap_security_group_id}"]
 
   # We're going to launch into the same subnet as our ELB. In a production
   # environment it's more common to have a separate private subnet for
