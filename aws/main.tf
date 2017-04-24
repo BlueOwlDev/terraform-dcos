@@ -100,7 +100,7 @@ resource "aws_elb" "internal-master-elb" {
   name = "${data.template_file.cluster-name.rendered}-int-master-elb"
 
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${var.dcos_master_internal_elb_security_group}"]
+  security_groups = ["${var.dcos_master_internal_elb_security_group_id}"]
   instances       = ["${aws_instance.master.*.id}"]
 
   listener {
