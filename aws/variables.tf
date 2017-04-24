@@ -1,3 +1,27 @@
+variable "dcos_private_slave_security_group_id" {
+  default = ""
+}
+
+variable "dcos_public_slave_security_group_id" {
+  default = ""
+}
+
+variable "dcos_master_security_group_id" {
+  default = ""
+}
+
+variable "dcos_master_internal_elb_security_group_id" {
+  default = ""
+}
+
+variable "dcos_master_external_elb_security_group_id" {
+  default = ""
+}
+
+variable "dcos_boostrap_security_group_id" {
+  default = ""
+}
+
 variable "bastion_host" {
   default = ""
 }
