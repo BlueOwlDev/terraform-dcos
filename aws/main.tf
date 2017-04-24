@@ -195,7 +195,7 @@ resource "aws_elb" "public-master-elb" {
 
 # Reattach the public ELBs to the agents if they change
 resource "aws_elb_attachment" "linkerd-elb" {
-  count    = "${var.num_of_agents}"
+  count    = "${var.num_of_private_agents}"
   elb      = "${aws_elb.linkerd-elb.id}"
   instance = "${element(aws_instance.agent.*.id, count.index)}"
 }
