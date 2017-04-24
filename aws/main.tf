@@ -41,13 +41,11 @@ resource "aws_s3_bucket" "dcos_bucket" {
   }
 }
 
-## A security group that allows all port access to internal vpc
 resource "aws_security_group" "dcos_host" {
-  name        = "dcos-cluster"
-  description = "Manage all ports DC/OS cluster level"
+  name        = "dcos-host"
+  description = "DC/OS host level"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
 
-  # full access internally 
   ingress {
     from_port   = 0
     to_port     = 0
@@ -55,7 +53,6 @@ resource "aws_security_group" "dcos_host" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # full access internally
   egress {
     from_port   = 0
     to_port     = 0
@@ -70,7 +67,6 @@ resource "aws_security_group" "dcos_elb" {
   description = "A security group for DC/OS ELB"
   vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
 
-  # http access from anywhere
   ingress {
     from_port   = 0
     to_port     = 0
@@ -78,7 +74,6 @@ resource "aws_security_group" "dcos_elb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # outbound internet access
   egress {
     from_port   = 0
     to_port     = 0
