@@ -227,7 +227,7 @@ resource "aws_elb" "linkerd-elb" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 2
-    target              = "HTTP:9990"
+    target              = "TCP:4041"
     interval            = 5
   }
 
