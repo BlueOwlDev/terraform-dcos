@@ -212,8 +212,8 @@ resource "aws_elb" "linkerd-elb" {
   }
 
   listener {
-    lb_port           = 4041
-    instance_port     = 4041
+    lb_port           = 4140
+    instance_port     = 4140
     lb_protocol       = "tcp"
     instance_protocol = "tcp"
   }
