@@ -21,11 +21,13 @@ data "external" "whoami" {
 }
 
 data "template_file" "cluster-name" {
-  template = "$${username}-tf$${uuid}"
+  # template = "$${deployment}-tf$${uuid}"
+  template = "$${deployment}"
 
   vars {
-    uuid     = "${substr(md5(data.terraform_remote_state.vpc.vpc_id),0,4)}"
-    username = "${coalesce(var.owner, data.external.whoami.result["owner"])}"
+    deployment = "${var.deployment}"
+
+    #   uuid     = "${substr(md5(data.terraform_remote_state.vpc.vpc_id),0,4)}"
   }
 }
 
@@ -41,46 +43,46 @@ resource "aws_s3_bucket" "dcos_bucket" {
   }
 }
 
-resource "aws_security_group" "dcos_host" {
-  name        = "dcos-host"
-  description = "DC/OS host level"
-  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
-
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-# A security group for the ELB so it is accessible via the web
-resource "aws_security_group" "dcos_elb" {
-  name        = "dcos-elb"
-  description = "A security group for DC/OS ELB"
-  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
-
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
+#resource "aws_security_group" "dcos_host" {
+#  name        = "dcos-host"
+#  description = "DC/OS host level"
+#  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
+#
+#  ingress {
+#    from_port   = 0
+#    to_port     = 0
+#    protocol    = "-1"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  egress {
+#    from_port   = 0
+#    to_port     = 0
+#    protocol    = "-1"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#}
+#
+## A security group for the ELB so it is accessible via the web
+#resource "aws_security_group" "dcos_elb" {
+#  name        = "dcos-elb"
+#  description = "A security group for DC/OS ELB"
+#  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
+#
+#  ingress {
+#    from_port   = 0
+#    to_port     = 0
+#    protocol    = "-1"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  egress {
+#    from_port   = 0
+#    to_port     = 0
+#    protocol    = "-1"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#}
 
 # Reattach the internal ELBs to the master if they change
 resource "aws_elb_attachment" "internal-master-elb" {
@@ -92,10 +94,10 @@ resource "aws_elb_attachment" "internal-master-elb" {
 # Internal Load Balancer Access
 # Mesos Master, Zookeeper, Exhibitor, Adminrouter, Marathon
 resource "aws_elb" "internal-master-elb" {
-  name = "${var.owner}-int-mstr"
+  name = "${var.deployment}-int-mstr"
 
-  subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${aws_security_group.dcos_elb.id}"]                    #["${var.dcos_master_internal_elb_security_group_id}"]
+  subnets         = ["${data.terraform_remote_state.vpc.private_subnet_ids}"]
+  security_groups = ["${var.dcos_master_internal_security_group_id}"]
   instances       = ["${aws_instance.master.*.id}"]
 
   listener {
@@ -158,7 +160,7 @@ resource "aws_elb" "public-master-elb" {
   name = "${var.owner}-pub-mstr"
 
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${aws_security_group.dcos_elb.id}"]                    #["${var.dcos_master_external_elb_security_group_id}"]
+  security_groups = ["${var.dcos_master_external_elb_security_group_id}"]
   instances       = ["${aws_instance.master.*.id}"]
 
   listener {
@@ -201,7 +203,7 @@ resource "aws_elb" "linkerd-elb" {
   name            = "${var.owner}-linkerd-elb"
   depends_on      = ["aws_instance.agent"]
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${aws_security_group.dcos_elb.id}"]
+  security_groups = ["${var.dcos_public_slave_security_group_id}"]
   instances       = ["${aws_instance.agent.*.id}"]
 
   listener {
@@ -257,7 +259,7 @@ resource "aws_instance" "master" {
   instance_type = "${var.aws_master_instance_type}"
 
   tags {
-    owner      = "${coalesce(var.owner, data.external.whoami.result["owner"])}"
+    deployment = "${var.deployment}"
     expiration = "${var.expiration}"
     Name       = "${data.template_file.cluster-name.rendered}-master-${count.index + 1}"
     cluster    = "${data.template_file.cluster-name.rendered}"
@@ -267,11 +269,8 @@ resource "aws_instance" "master" {
   # we specified
   ami = "${module.aws-tested-oses.aws_ami}"
 
-  # The name of our SSH keypair we created above.
-  key_name = "${var.key_name}"
-
-  # Our Security group to allow http and SSH access
-  vpc_security_group_ids = ["${aws_security_group.dcos_host.id}"] #["${var.dcos_master_security_group_id}"]
+  key_name               = "${var.key_name}"
+  vpc_security_group_ids = ["${var.dcos_master_security_group_id}"]
 
   # OS init script
   provisioner "file" {
@@ -279,14 +278,8 @@ resource "aws_instance" "master" {
     destination = "/tmp/os-setup.sh"
   }
 
-  # We're going to launch into the same subnet as our ELB. In a production
-  # environment it's more common to have a separate private subnet for
-  # backend instances.
   subnet_id = "${element(data.terraform_remote_state.vpc.private_subnet_ids, count.index)}"
 
-  # We run a remote provisioner on the instance after creating it.
-  # In this case, we just install nginx and start it. By default,
-  # this should be on port 80
   provisioner "remote-exec" {
     inline = [
       "sudo chmod +x /tmp/os-setup.sh",
@@ -329,15 +322,9 @@ resource "aws_instance" "agent" {
   # we specified
   ami = "${module.aws-tested-oses.aws_ami}"
 
-  # The name of our SSH keypair we created above.
-  key_name = "${var.key_name}"
+  key_name               = "${var.key_name}"
+  vpc_security_group_ids = ["${var.dcos_private_slave_security_group_id}"]
 
-  # Our Security group to allow http and SSH access
-  vpc_security_group_ids = ["${aws_security_group.dcos_host.id}"] #["${var.dcos_private_slave_security_group_id}"]
-
-  # We're going to launch into the same subnet as our ELB. In a production
-  # environment it's more common to have a separate private subnet for
-  # backend instances.
   subnet_id = "${element(data.terraform_remote_state.vpc.private_subnet_ids, count.index)}"
 
   # OS init script
@@ -391,16 +378,10 @@ resource "aws_instance" "public-agent" {
   # we specified
   ami = "${module.aws-tested-oses.aws_ami}"
 
-  # The name of our SSH keypair we created above.
-  key_name = "${var.key_name}"
+  key_name               = "${var.key_name}"
+  vpc_security_group_ids = ["${var.dcos_public_slave_security_group_id}"]
 
-  # Our Security group to allow http and SSH access
-  vpc_security_group_ids = ["${aws_security_group.dcos_host.id}"] #["${var.dcos_public_slave_security_group_id}"]
-
-  # We're going to launch into the same subnet as our ELB. In a production
-  # environment it's more common to have a separate private subnet for
-  # backend instances.
-  subnet_id = "${data.terraform_remote_state.vpc.private_subnet_ids[0]}"
+  subnet_id = "${data.terraform_remote_state.vpc.public_subnet_ids[0]}"
 
   # OS init script
   provisioner "file" {
@@ -450,15 +431,9 @@ resource "aws_instance" "bootstrap" {
   # we specified
   ami = "${module.aws-tested-oses.aws_ami}"
 
-  # The name of our SSH keypair we created above.
-  key_name = "${var.key_name}"
+  key_name               = "${var.key_name}"
+  vpc_security_group_ids = ["${var.dcos_bootstrap_security_group_id}"]
 
-  # Our Security group to allow http and SSH access
-  vpc_security_group_ids = ["${aws_security_group.dcos_host.id}"] #["${var.dcos_bootstrap_security_group_id}"]
-
-  # We're going to launch into the same subnet as our ELB. In a production
-  # environment it's more common to have a separate private subnet for
-  # backend instances.
   subnet_id = "${data.terraform_remote_state.vpc.private_subnet_ids[0]}"
 
   # DCOS ip detect script
@@ -734,11 +709,12 @@ resource "null_resource" "master" {
   }
 
   # Watch Master Nodes Start
-  provisioner "remote-exec" {
-    inline = [
-      "until $(curl --output /dev/null --silent --head --fail http://${element(aws_instance.master.*.public_ip, count.index)}/); do printf 'loading DC/OS...'; sleep 10; done",
-    ]
-  }
+  # Does not work if Terraform is not on the same network as Masters since we've locked down this deployment. 
+  #  provisioner "remote-exec" {
+  #    inline = [
+  #      "until $(curl --output /dev/null --silent --head --fail http://${element(aws_instance.master.*.public_ip, count.index)}/); do printf 'loading DC/OS...'; sleep 10; done",
+  #    ]
+  #  }
 }
 
 # Create DCOS Mesos Agent Scripts to execute
