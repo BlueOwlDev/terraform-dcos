@@ -43,47 +43,6 @@ resource "aws_s3_bucket" "dcos_bucket" {
   }
 }
 
-#resource "aws_security_group" "dcos_host" {
-#  name        = "dcos-host"
-#  description = "DC/OS host level"
-#  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
-#
-#  ingress {
-#    from_port   = 0
-#    to_port     = 0
-#    protocol    = "-1"
-#    cidr_blocks = ["0.0.0.0/0"]
-#  }
-#
-#  egress {
-#    from_port   = 0
-#    to_port     = 0
-#    protocol    = "-1"
-#    cidr_blocks = ["0.0.0.0/0"]
-#  }
-#}
-#
-## A security group for the ELB so it is accessible via the web
-#resource "aws_security_group" "dcos_elb" {
-#  name        = "dcos-elb"
-#  description = "A security group for DC/OS ELB"
-#  vpc_id      = "${data.terraform_remote_state.vpc.vpc_id}"
-#
-#  ingress {
-#    from_port   = 0
-#    to_port     = 0
-#    protocol    = "-1"
-#    cidr_blocks = ["0.0.0.0/0"]
-#  }
-#
-#  egress {
-#    from_port   = 0
-#    to_port     = 0
-#    protocol    = "-1"
-#    cidr_blocks = ["0.0.0.0/0"]
-#  }
-#}
-
 # Reattach the internal ELBs to the master if they change
 resource "aws_elb_attachment" "internal-master-elb" {
   count    = "${var.num_of_masters}"
@@ -203,7 +162,7 @@ resource "aws_elb" "linkerd-elb" {
   name            = "${var.deployment}-linkerd-elb"
   depends_on      = ["aws_instance.agent"]
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${var.dcos_public_slave_security_group_id}"]
+  security_groups = ["${var.linkerd_public_elb_security_group_id}"]
   instances       = ["${aws_instance.agent.*.id}"]
 
   listener {

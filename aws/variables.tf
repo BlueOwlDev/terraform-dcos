@@ -2,6 +2,10 @@ variable "deployment" {
   default = "default"
 }
 
+variable "linkerd_public_elb_security_group_id" {
+	default = ""
+}
+
 variable "dcos_private_slave_security_group_id" {
   default = ""
 }
