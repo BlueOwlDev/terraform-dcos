@@ -97,7 +97,7 @@ resource "aws_elb" "internal-master-elb" {
   name = "${var.deployment}-int-mstr"
 
   subnets         = ["${data.terraform_remote_state.vpc.private_subnet_ids}"]
-  security_groups = ["${var.dcos_master_internal_security_group_id}"]
+  security_groups = ["${var.dcos_master_internal_elb_security_group_id}"]
   instances       = ["${aws_instance.master.*.id}"]
 
   listener {
