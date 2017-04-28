@@ -33,7 +33,7 @@ data "template_file" "cluster-name" {
 
 # Create DCOS Bucket regardless of what exhibitor backend was chosen
 resource "aws_s3_bucket" "dcos_bucket" {
-  bucket        = "${data.template_file.cluster-name.rendered}-bucket"
+  bucket        = "blueowl-dcos-${var.deployment}-master-state"
   acl           = "private"
   force_destroy = "true"
 
