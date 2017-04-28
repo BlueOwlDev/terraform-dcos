@@ -22,7 +22,7 @@ data "external" "whoami" {
 
 data "template_file" "cluster-name" {
   # template = "$${deployment}-tf$${uuid}"
-  template = "$${deployment}"
+  template = "dcos-$${deployment}"
 
   vars {
     deployment = "${var.deployment}"

@@ -1,3 +1,7 @@
+variable "master_state_s3_bucket_name" {
+	default = ""
+}
+
 variable "deployment" {
   default = "default"
 }
