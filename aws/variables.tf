@@ -1,3 +1,7 @@
+variable "deployment" {
+  default = "default"
+}
+
 variable "dcos_private_slave_security_group_id" {
   default = ""
 }
