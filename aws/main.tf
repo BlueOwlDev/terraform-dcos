@@ -163,7 +163,7 @@ resource "aws_elb" "linkerd-elb" {
   depends_on      = ["aws_instance.agent"]
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
   security_groups = ["${var.linkerd_public_elb_security_group_id}"]
-  instances       = ["${aws_instance.agent.*.id}"]
+  instances       = ["${aws_instance.public-agent.*.id}"]
 
   listener {
     lb_port           = 9990
@@ -338,7 +338,9 @@ resource "aws_instance" "public-agent" {
   key_name               = "${var.key_name}"
   vpc_security_group_ids = ["${var.dcos_public_slave_security_group_id}"]
 
-  subnet_id = "${data.terraform_remote_state.vpc.public_subnet_ids[0]}"
+  # Public slaves are deployed to the private subnet still and are only
+  # available via the linkerd ELB.
+  subnet_id = "${data.terraform_remote_state.vpc.private_subnet_ids[0]}"
 
   # OS init script
   provisioner "file" {
