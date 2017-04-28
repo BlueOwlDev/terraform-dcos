@@ -157,7 +157,7 @@ resource "aws_elb_attachment" "public-master-elb" {
 # Public Master Load Balancer Access
 # Adminrouter Only
 resource "aws_elb" "public-master-elb" {
-  name = "${var.owner}-pub-mstr"
+  name = "${var.deployment}-pub-mstr"
 
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
   security_groups = ["${var.dcos_master_external_elb_security_group_id}"]
@@ -200,7 +200,7 @@ resource "aws_elb_attachment" "linkerd-elb" {
 # Public Agent Load Balancer Access
 # Adminrouter Only
 resource "aws_elb" "linkerd-elb" {
-  name            = "${var.owner}-linkerd-elb"
+  name            = "${var.deployment}-linkerd-elb"
   depends_on      = ["aws_instance.agent"]
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
   security_groups = ["${var.dcos_public_slave_security_group_id}"]
@@ -312,8 +312,7 @@ resource "aws_instance" "agent" {
   instance_type = "${var.aws_agent_instance_type}"
 
   tags {
-    owner      = "${coalesce(var.owner, data.external.whoami.result["owner"])}"
-    expiration = "${var.expiration}"
+    deployment = "${var.deployment}"
     Name       = "${data.template_file.cluster-name.rendered}-pvtagt-${count.index + 1}"
     cluster    = "${data.template_file.cluster-name.rendered}"
   }
@@ -368,8 +367,7 @@ resource "aws_instance" "public-agent" {
   instance_type = "${var.aws_public_agent_instance_type}"
 
   tags {
-    owner      = "${coalesce(var.owner, data.external.whoami.result["owner"])}"
-    expiration = "${var.expiration}"
+    deployment = "${var.deployment}"
     Name       = "${data.template_file.cluster-name.rendered}-pubagt-${count.index + 1}"
     cluster    = "${data.template_file.cluster-name.rendered}"
   }
@@ -421,8 +419,7 @@ resource "aws_instance" "bootstrap" {
   instance_type = "${var.aws_bootstrap_instance_type}"
 
   tags {
-    owner      = "${coalesce(var.owner, data.external.whoami.result["owner"])}"
-    expiration = "${var.expiration}"
+    deployment = "${var.deployment}"
     Name       = "${data.template_file.cluster-name.rendered}-bootstrap"
     cluster    = "${data.template_file.cluster-name.rendered}"
   }
