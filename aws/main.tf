@@ -53,7 +53,7 @@ resource "aws_elb_attachment" "private-master-elb" {
 # Internal Load Balancer Access
 # Mesos Master, Zookeeper, Exhibitor, Adminrouter, Marathon
 resource "aws_elb" "private-master-elb" {
-  name = "${var.deployment}-int-mstr"
+  name = "${var.deployment}-mstr-private"
 
   subnets         = ["${data.terraform_remote_state.vpc.private_subnet_ids}"]
   security_groups = ["${var.dcos_master_internal_elb_security_group_id}"]
