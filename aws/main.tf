@@ -109,7 +109,7 @@ resource "aws_elb" "private-master-elb" {
 # Reattach the public ELBs to the agents if they change
 resource "aws_elb_attachment" "linkerd-elb-public" {
   count    = "${var.num_of_private_agents}"
-  elb      = "${aws_elb.linkerd-elb.id}"
+  elb      = "${aws_elb.linkerd-elb-public.id}"
   instance = "${element(aws_instance.agent.*.id, count.index)}"
 }
 
@@ -413,7 +413,7 @@ module "dcos-bootstrap" {
   dcos_customer_key                            = "${var.dcos_customer_key}"
   dcos_dns_search                              = "${var.dcos_dns_search}"
   dcos_docker_remove_delay                     = "${var.dcos_docker_remove_delay}"
-  dcos_exhibitor_address                       = "${aws_elb.internal-master-elb.dns_name}"
+  dcos_exhibitor_address                       = "${aws_elb.private-master-elb.dns_name}"
   dcos_exhibitor_azure_account_key             = "${var.dcos_exhibitor_azure_account_key}"
   dcos_exhibitor_azure_account_name            = "${var.dcos_exhibitor_azure_account_name}"
   dcos_exhibitor_azure_prefix                  = "${var.dcos_exhibitor_azure_prefix}"
@@ -494,7 +494,7 @@ resource "null_resource" "bootstrap" {
     dcos_customer_key                            = "${var.dcos_customer_key}"
     dcos_dns_search                              = "${var.dcos_dns_search}"
     dcos_docker_remove_delay                     = "${var.dcos_docker_remove_delay}"
-    dcos_exhibitor_address                       = "${aws_elb.internal-master-elb.dns_name}"
+    dcos_exhibitor_address                       = "${aws_elb.private-master-elb.dns_name}"
     dcos_exhibitor_azure_account_key             = "${var.dcos_exhibitor_azure_account_key}"
     dcos_exhibitor_azure_account_name            = "${var.dcos_exhibitor_azure_account_name}"
     dcos_exhibitor_azure_prefix                  = "${var.dcos_exhibitor_azure_prefix}"
