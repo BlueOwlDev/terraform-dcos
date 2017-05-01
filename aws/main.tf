@@ -44,15 +44,15 @@ resource "aws_s3_bucket" "dcos_bucket" {
 }
 
 # Reattach the internal ELBs to the master if they change
-resource "aws_elb_attachment" "internal-master-elb" {
+resource "aws_elb_attachment" "private-master-elb" {
   count    = "${var.num_of_masters}"
-  elb      = "${aws_elb.internal-master-elb.id}"
+  elb      = "${aws_elb.private-master-elb.id}"
   instance = "${element(aws_instance.master.*.id, count.index)}"
 }
 
 # Internal Load Balancer Access
 # Mesos Master, Zookeeper, Exhibitor, Adminrouter, Marathon
-resource "aws_elb" "internal-master-elb" {
+resource "aws_elb" "private-master-elb" {
   name = "${var.deployment}-int-mstr"
 
   subnets         = ["${data.terraform_remote_state.vpc.private_subnet_ids}"]
@@ -106,51 +106,8 @@ resource "aws_elb" "internal-master-elb" {
   }
 }
 
-# Reattach the public ELBs to the master if they change
-resource "aws_elb_attachment" "public-master-elb" {
-  count    = "${var.num_of_masters}"
-  elb      = "${aws_elb.public-master-elb.id}"
-  instance = "${element(aws_instance.master.*.id, count.index)}"
-}
-
-# Public Master Load Balancer Access
-# Adminrouter Only
-resource "aws_elb" "public-master-elb" {
-  name = "${var.deployment}-pub-mstr"
-
-  subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
-  security_groups = ["${var.dcos_master_external_elb_security_group_id}"]
-  instances       = ["${aws_instance.master.*.id}"]
-
-  listener {
-    lb_port           = 80
-    instance_port     = 80
-    lb_protocol       = "tcp"
-    instance_protocol = "tcp"
-  }
-
-  listener {
-    lb_port           = 443
-    instance_port     = 443
-    lb_protocol       = "tcp"
-    instance_protocol = "tcp"
-  }
-
-  health_check {
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    timeout             = 5
-    target              = "TCP:5050"
-    interval            = 30
-  }
-
-  lifecycle {
-    ignore_changes = ["name"]
-  }
-}
-
 # Reattach the public ELBs to the agents if they change
-resource "aws_elb_attachment" "linkerd-elb" {
+resource "aws_elb_attachment" "linkerd-elb-public" {
   count    = "${var.num_of_private_agents}"
   elb      = "${aws_elb.linkerd-elb.id}"
   instance = "${element(aws_instance.agent.*.id, count.index)}"
@@ -158,8 +115,8 @@ resource "aws_elb_attachment" "linkerd-elb" {
 
 # Public Agent Load Balancer Access
 # Adminrouter Only
-resource "aws_elb" "linkerd-elb" {
-  name            = "${var.deployment}-linkerd-elb"
+resource "aws_elb" "linkerd-elb-public" {
+  name            = "${var.deployment}-linkerd-public"
   depends_on      = ["aws_instance.agent"]
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
   security_groups = ["${var.linkerd_public_elb_security_group_id}"]
@@ -183,7 +140,7 @@ resource "aws_elb" "linkerd-elb" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 2
-    target              = "TCP:4041"
+    target              = "TCP:4140"
     interval            = 5
   }
 
