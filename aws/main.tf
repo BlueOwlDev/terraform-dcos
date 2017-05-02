@@ -106,21 +106,46 @@ resource "aws_elb" "private-master-elb" {
   }
 }
 
-# Reattach the public ELBs to the agents if they change
-resource "aws_elb_attachment" "linkerd-elb-public" {
-  count    = "${var.num_of_private_agents}"
-  elb      = "${aws_elb.linkerd-elb-public.id}"
-  instance = "${element(aws_instance.agent.*.id, count.index)}"
-}
-
-# Public Agent Load Balancer Access
-# Adminrouter Only
 resource "aws_elb" "linkerd-elb-public" {
   name            = "${var.deployment}-linkerd-public"
   depends_on      = ["aws_instance.agent"]
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
   security_groups = ["${var.linkerd_public_elb_security_group_id}"]
   instances       = ["${aws_instance.public-agent.*.id}"]
+
+  listener {
+    lb_port           = 9990
+    instance_port     = 9990
+    lb_protocol       = "tcp"
+    instance_protocol = "tcp"
+  }
+
+  listener {
+    lb_port           = 4140
+    instance_port     = 4140
+    lb_protocol       = "tcp"
+    instance_protocol = "tcp"
+  }
+
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 2
+    target              = "TCP:4140"
+    interval            = 5
+  }
+
+  lifecycle {
+    ignore_changes = ["name"]
+  }
+}
+
+resource "aws_elb" "linkerd-elb-private" {
+  name            = "${var.deployment}-linkerd-private"
+  depends_on      = ["aws_instance.agent"]
+  subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
+  security_groups = ["${var.linkerd_private_elb_security_group_id}"]
+  instances       = ["${aws_instance.private-agent.*.id}"]
 
   listener {
     lb_port           = 9990
