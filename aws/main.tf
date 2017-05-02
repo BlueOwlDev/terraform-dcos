@@ -152,7 +152,7 @@ resource "aws_elb" "linkerd-elb-private" {
   depends_on      = ["aws_instance.agent"]
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
   security_groups = ["${var.linkerd_private_elb_security_group_id}"]
-  instances       = ["${aws_instance.private-agent.*.id}"]
+  instances       = ["${aws_instance.agent.*.id}"]
   internal        = true
 
   listener {
