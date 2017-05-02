@@ -22,10 +22,6 @@ variable "dcos_master_internal_elb_security_group_id" {
   default = ""
 }
 
-variable "dcos_master_external_elb_security_group_id" {
-  default = ""
-}
-
 variable "dcos_bootstrap_security_group_id" {
   default = ""
 }
