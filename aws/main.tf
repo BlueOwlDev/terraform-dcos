@@ -101,6 +101,14 @@ resource "aws_elb" "private-master-elb" {
     instance_protocol = "http"
   }
 
+	health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 2
+    target              = "HTTP:80/"
+    interval            = 5
+  }
+
   lifecycle {
     ignore_changes = ["name"]
   }
