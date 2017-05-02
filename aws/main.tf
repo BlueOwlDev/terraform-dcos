@@ -45,7 +45,7 @@ resource "aws_s3_bucket" "dcos_bucket" {
 
 resource "aws_elb" "private-master-elb" {
   name            = "${var.deployment}-mstr-private"
-  subnets         = ["${data.terraform_remote_state.vpc.private_subnet_ids}"]
+  subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
   security_groups = ["${var.dcos_master_internal_elb_security_group_id}"]
   instances       = ["${aws_instance.master.*.id}"]
 
