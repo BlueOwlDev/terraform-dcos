@@ -43,15 +43,6 @@ resource "aws_s3_bucket" "dcos_bucket" {
   }
 }
 
-# Reattach the internal ELBs to the master if they change
-resource "aws_elb_attachment" "private-master-elb" {
-  count    = "${var.num_of_masters}"
-  elb      = "${aws_elb.private-master-elb.id}"
-  instance = "${element(aws_instance.master.*.id, count.index)}"
-}
-
-# Internal Load Balancer Access
-# Mesos Master, Zookeeper, Exhibitor, Adminrouter, Marathon
 resource "aws_elb" "private-master-elb" {
   name            = "${var.deployment}-mstr-private"
   subnets         = ["${data.terraform_remote_state.vpc.private_subnet_ids}"]
@@ -150,10 +141,9 @@ resource "aws_elb" "linkerd-elb-public" {
 resource "aws_elb" "linkerd-elb-private" {
   name            = "${var.deployment}-linkerd-private"
   depends_on      = ["aws_instance.agent"]
-  subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
+  subnets         = ["${data.terraform_remote_state.vpc.private_subnet_ids}"]
   security_groups = ["${var.linkerd_private_elb_security_group_id}"]
   instances       = ["${aws_instance.agent.*.id}"]
-  internal        = true
 
   listener {
     lb_port           = 9990
