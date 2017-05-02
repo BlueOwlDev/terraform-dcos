@@ -146,6 +146,7 @@ resource "aws_elb" "linkerd-elb-private" {
   subnets         = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
   security_groups = ["${var.linkerd_private_elb_security_group_id}"]
   instances       = ["${aws_instance.private-agent.*.id}"]
+  internal        = true
 
   listener {
     lb_port           = 9990
