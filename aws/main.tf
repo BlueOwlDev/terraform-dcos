@@ -577,15 +577,11 @@ resource "null_resource" "master" {
       "sudo chmod +x run.sh",
       "sudo ./run.sh",
     ]
-  }
 
-  # Watch Master Nodes Start
-  # Does not work if Terraform is not on the same network as Masters since we've locked down this deployment. 
-  #  provisioner "remote-exec" {
-  #    inline = [
-  #      "until $(curl --output /dev/null --silent --head --fail http://${element(aws_instance.master.*.public_ip, count.index)}/); do printf 'loading DC/OS...'; sleep 10; done",
-  #    ]
-  #  }
+    provisioner "remote-exec" {
+      script = "${var.override_script}"
+    }
+  }
 }
 
 # Create DCOS Mesos Agent Scripts to execute
@@ -636,6 +632,10 @@ resource "null_resource" "agent" {
       "sudo ./run.sh",
     ]
   }
+
+  provisioner "remote-exec" {
+    script = "${var.override_script}"
+  }
 }
 
 # Create DCOS Mesos Public Agent Scripts to execute
@@ -685,5 +685,9 @@ resource "null_resource" "public-agent" {
       "sudo chmod +x run.sh",
       "sudo ./run.sh",
     ]
+  }
+
+  provisioner "remote-exec" {
+    script = "${var.override_script}"
   }
 }
