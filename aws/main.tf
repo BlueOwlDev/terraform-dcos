@@ -714,7 +714,7 @@ resource "null_resource" "agent_overrides" {
     agent        = true
   }
 
-  count = "${var.num_of_agents}"
+  count = "${var.num_of_private_agents}"
   
 	provisioner "remote-exec" {
     script = "${var.override_script}"
