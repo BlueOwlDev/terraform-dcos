@@ -577,10 +577,10 @@ resource "null_resource" "master" {
       "sudo chmod +x run.sh",
       "sudo ./run.sh",
     ]
+  }
 
-    provisioner "remote-exec" {
-      script = "${var.override_script}"
-    }
+  provisioner "remote-exec" {
+    script = "${var.override_script}"
   }
 }
 
