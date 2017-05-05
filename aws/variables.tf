@@ -1,5 +1,5 @@
 variable "override_script" {
-	default = "${path.module}/noop.sh"
+	default = ""
 }
 
 variable "master_state_s3_bucket_name" {
