@@ -689,14 +689,7 @@ resource "null_resource" "public-agent" {
 
 }
 
-resource "null_resource" "overrides" {
-  # Changes to any instance of the cluster requires re-provisioning
-  #triggers {
-  #  cluster_instance_ids = "${null_resource.bootstrap.id}"
-  #}
-
-  # Bootstrap script can run on any instance of the cluster
-  # So we just choose the first in this case
+resource "null_resource" "master_overrides" {
   connection {
     host         = "${element(aws_instance.master.*.private_ip, count.index)}"
     user         = "${module.aws-tested-oses.user}"
@@ -712,3 +705,34 @@ resource "null_resource" "overrides" {
   }
 }
 
+resource "null_resource" "agent_overrides" {
+  connection {
+    host         = "${element(aws_instance.agent.*.private_ip, count.index)}"
+    user         = "${module.aws-tested-oses.user}"
+    bastion_host = "${var.bastion_host}"
+    bastion_user = "${var.bastion_user}"
+    agent        = true
+  }
+
+  count = "${var.num_of_agents}"
+  
+	provisioner "remote-exec" {
+    script = "${var.override_script}"
+  }
+}
+
+resource "null_resource" "public_agent_overrides" {
+  connection {
+    host         = "${element(aws_instance.public-agent.*.private_ip, count.index)}"
+    user         = "${module.aws-tested-oses.user}"
+    bastion_host = "${var.bastion_host}"
+    bastion_user = "${var.bastion_user}"
+    agent        = true
+  }
+
+  count = "${var.num_of_public_agents}"
+  
+	provisioner "remote-exec" {
+    script = "${var.override_script}"
+  }
+}
