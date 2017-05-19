@@ -193,6 +193,7 @@ resource "aws_instance" "agent" {
   # we specified
   ami = "${module.aws-tested-oses.aws_ami}"
 
+  iam_instance_profile   = "${var.dcos_agent_instance_profile_id}"
   key_name               = "${var.key_name}"
   vpc_security_group_ids = ["${var.dcos_private_slave_security_group_id}"]
 
@@ -686,7 +687,6 @@ resource "null_resource" "public-agent" {
       "sudo ./run.sh",
     ]
   }
-
 }
 
 resource "null_resource" "master_overrides" {
@@ -699,8 +699,8 @@ resource "null_resource" "master_overrides" {
   }
 
   count = "${var.num_of_masters}"
-  
-	provisioner "remote-exec" {
+
+  provisioner "remote-exec" {
     script = "${var.override_script}"
   }
 }
@@ -715,8 +715,8 @@ resource "null_resource" "agent_overrides" {
   }
 
   count = "${var.num_of_private_agents}"
-  
-	provisioner "remote-exec" {
+
+  provisioner "remote-exec" {
     script = "${var.override_script}"
   }
 }
@@ -731,8 +731,8 @@ resource "null_resource" "public_agent_overrides" {
   }
 
   count = "${var.num_of_public_agents}"
-  
-	provisioner "remote-exec" {
+
+  provisioner "remote-exec" {
     script = "${var.override_script}"
   }
 }

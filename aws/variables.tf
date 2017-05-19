@@ -1,3 +1,7 @@
+variable "dcos_agent_instance_profile_id" {
+	default = ""
+}
+
 variable "override_script" {
 	default = ""
 }
