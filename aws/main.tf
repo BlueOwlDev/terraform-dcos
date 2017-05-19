@@ -180,8 +180,10 @@ resource "aws_instance" "agent" {
     volume_size = "${var.instance_disk_size}"
   }
 
-  count         = "${var.num_of_private_agents}"
-  instance_type = "${var.aws_agent_instance_type}"
+  count                = "${var.num_of_private_agents}"
+  instance_type        = "${var.aws_agent_instance_type}"
+  user_data            = "${var.agent_host_user_data}"
+  iam_instance_profile = "${var.dcos_agent_instance_profile_id}"
 
   tags {
     deployment = "${var.deployment}"
@@ -193,7 +195,6 @@ resource "aws_instance" "agent" {
   # we specified
   ami = "${module.aws-tested-oses.aws_ami}"
 
-  iam_instance_profile   = "${var.dcos_agent_instance_profile_id}"
   key_name               = "${var.key_name}"
   vpc_security_group_ids = ["${var.dcos_private_slave_security_group_id}"]
 
@@ -236,8 +237,10 @@ resource "aws_instance" "public-agent" {
     volume_size = "${var.instance_disk_size}"
   }
 
-  count         = "${var.num_of_public_agents}"
-  instance_type = "${var.aws_public_agent_instance_type}"
+  count                = "${var.num_of_public_agents}"
+  instance_type        = "${var.aws_public_agent_instance_type}"
+  user_data            = "${var.agent_host_user_data}"
+  iam_instance_profile = "${var.dcos_agent_instance_profile_id}"
 
   tags {
     deployment = "${var.deployment}"

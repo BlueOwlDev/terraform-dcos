@@ -1,3 +1,7 @@
+variable "agent_host_user_data" {
+	default = ""
+}
+
 variable "dcos_agent_instance_profile_id" {
 	default = ""
 }
