@@ -137,9 +137,8 @@ resource "aws_instance" "master" {
     cluster    = "${data.template_file.cluster-name.rendered}"
   }
 
-  # Lookup the correct AMI based on the region
-  # we specified
-  ami = "${module.aws-tested-oses.aws_ami}"
+	# We pass in the AMI from the caller so the ID isn't made public.
+  ami = "${lookup(var.ami, "${terraform.env}"-"${var.aws_region}")}" #"${module.aws-tested-oses.aws_ami}"
 
   key_name               = "${var.key_name}"
   vpc_security_group_ids = ["${var.dcos_master_security_group_id}"]

@@ -1,3 +1,7 @@
+variable "ami"{ 
+	default = {} 
+}
+
 variable "agent_host_user_data" {
 	default = ""
 }
