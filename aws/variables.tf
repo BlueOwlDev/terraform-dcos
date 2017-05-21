@@ -1,5 +1,5 @@
 variable "ami"{ 
-	default = {} 
+	default = "" 
 }
 
 variable "agent_host_user_data" {
