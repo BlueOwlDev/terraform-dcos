@@ -192,7 +192,7 @@ resource "aws_instance" "agent" {
 
   # Lookup the correct AMI based on the region
   # we specified
-  ami = "${module.aws-tested-oses.aws_ami}"
+  ami = "${var.ami}"
 
   key_name               = "${var.key_name}"
   vpc_security_group_ids = ["${var.dcos_private_slave_security_group_id}"]
@@ -249,7 +249,7 @@ resource "aws_instance" "public-agent" {
 
   # Lookup the correct AMI based on the region
   # we specified
-  ami = "${module.aws-tested-oses.aws_ami}"
+  ami = "${var.ami}"
 
   key_name               = "${var.key_name}"
   vpc_security_group_ids = ["${var.dcos_public_slave_security_group_id}"]
@@ -303,7 +303,7 @@ resource "aws_instance" "bootstrap" {
 
   # Lookup the correct AMI based on the region
   # we specified
-  ami = "${module.aws-tested-oses.aws_ami}"
+  ami = "${var.ami}"
 
   key_name               = "${var.key_name}"
   vpc_security_group_ids = ["${var.dcos_bootstrap_security_group_id}"]
