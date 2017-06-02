@@ -2,6 +2,18 @@ variable "ami"{
 	default = "" 
 }
 
+variable "master_spec_directory_path" {
+  default = ""
+}
+
+variable "agent_spec_directory_path" {
+  default = ""
+}
+
+variable "public_agent_spec_directory_path" {
+  default = ""
+}
+
 variable "agent_host_user_data" {
 	default = ""
 }
