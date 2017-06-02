@@ -205,6 +205,11 @@ resource "aws_instance" "agent" {
     destination = "/tmp/os-setup.sh"
   }
 
+  provisioner "file" {
+    source      = "${var.agent_spec_directory_path}"
+    destination = "/opt"
+  }
+
   # We run a remote provisioner on the instance after creating it.
   # In this case, we just install nginx and start it. By default,
   # this should be on port 80
@@ -736,5 +741,39 @@ resource "null_resource" "public_agent_overrides" {
 
   provisioner "remote-exec" {
     script = "${var.override_script}"
+  }
+}
+
+resource "null_resource" "master_spec" {
+  connection {
+    host         = "${element(aws_instance.master.*.private_ip, count.index)}"
+    user         = "${module.aws-tested-oses.user}"
+    bastion_host = "${var.bastion_host}"
+    bastion_user = "${var.bastion_user}"
+    agent        = true
+  }
+
+  count = "${var.num_of_masters}"
+
+  provisioner "file" {
+    source      = "${var.master_spec_directory_path}"
+    destination = "/opt"
+  }
+}
+
+resource "null_resource" "agent_spec" {
+  connection {
+    host         = "${element(aws_instance.agent.*.private_ip, count.index)}"
+    user         = "${module.aws-tested-oses.user}"
+    bastion_host = "${var.bastion_host}"
+    bastion_user = "${var.bastion_user}"
+    agent        = true
+  }
+
+  count = "${var.num_of_private_agents}"
+
+  provisioner "file" {
+    source      = "${var.public_agent_spec_directory_path}"
+    destination = "/opt"
   }
 }
