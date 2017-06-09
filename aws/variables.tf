@@ -3,10 +3,12 @@ variable "ami"{
 }
 
 variable "dcos_users_script" {
+	description = "A script to provision users on DC/OS masters"
   default = ""
 }
 
 variable "agent_host_user_data" {
+	description = "users-data.txt script to execute on agents"
 	default = ""
 }
 
@@ -15,6 +17,7 @@ variable "dcos_agent_instance_profile_id" {
 }
 
 variable "override_script" {
+	description = "Generic overrides script like configuring docker daemon configuration"
 	default = ""
 }
 
