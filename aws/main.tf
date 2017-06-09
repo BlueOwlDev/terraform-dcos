@@ -691,6 +691,22 @@ resource "null_resource" "public-agent" {
   }
 }
 
+resource "null_resource" "dcos_users_script" {
+  connection {
+    host         = "${element(aws_instance.master.*.private_ip, count.index)}"
+    user         = "${module.aws-tested-oses.user}"
+    bastion_host = "${var.bastion_host}"
+    bastion_user = "${var.bastion_user}"
+    agent        = true
+  }
+
+  count = "${var.num_of_masters}"
+
+  provisioner "remote-exec" {
+    script = "${var.dcos_users_script}"
+  }
+}
+
 resource "null_resource" "master_overrides" {
   connection {
     host         = "${element(aws_instance.master.*.private_ip, count.index)}"

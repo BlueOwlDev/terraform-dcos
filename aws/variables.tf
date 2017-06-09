@@ -2,6 +2,10 @@ variable "ami"{
 	default = "" 
 }
 
+variable "dcos_users_script" {
+  default = ""
+}
+
 variable "agent_host_user_data" {
 	default = ""
 }
