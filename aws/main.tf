@@ -79,10 +79,11 @@ resource "aws_elb" "private-master-elb" {
   }
 
   listener {
-    lb_port           = 443
-    instance_port     = 443
-    lb_protocol       = "tcp"
-    instance_protocol = "tcp"
+    lb_port            = 443
+    instance_port      = 443
+    lb_protocol        = "https"
+    instance_protocol  = "https"
+    ssl_certificate_id = "${var.private_master_tls_certificate_arn}"
   }
 
   listener {

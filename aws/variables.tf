@@ -1,3 +1,7 @@
+variable "private_master_tls_certificate_arn" {
+  default = ""
+}
+
 variable "ami"{ 
 	default = "" 
 }
