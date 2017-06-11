@@ -89,8 +89,9 @@ resource "aws_elb" "private-master-elb" {
   listener {
     lb_port           = 8080
     instance_port     = 8080
-    lb_protocol       = "http"
+    lb_protocol       = "https"
     instance_protocol = "http"
+    ssl_certificate_id = "${var.private_master_tls_certificate_arn}"
   }
 
   health_check {
